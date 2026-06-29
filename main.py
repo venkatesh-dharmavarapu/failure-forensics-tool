@@ -1,36 +1,35 @@
 import pipeline
 import storage
+import analyzer
 from models import IntakeInput
 
 def run_forensics_hubs():
-    # Initialize the local database structural framework
+    # Initialize local directories and database
     storage.init_db()
     
-    # --- SUCCESS SCENARIO ---
-    doc_success = (
-        "ACME Corp Service Agreement. Date: June 15, 2026. "
-        "This contract outlines that client John Doe will pay $5,000 to ACME Corp for software development services."
-    )
-    print("\nExecuting Scenario 1: Clean Execution...")
-    intake_1 = pipeline.step_1_intake(IntakeInput(raw_text=doc_success))
-    pipeline.step_2_extraction(intake_1)
-    class_1 = pipeline.step_3_classification(intake_1)
-    pipeline.step_4_summarization(intake_1, doc_type=class_1.document_type)
-    
-    trace_1 = pipeline.flush_trace()
-    storage.save_trace(trace_1)
-
-    # --- FAILURE / DEGRADED SCENARIO ---
+    # --- SCENARIO: RUNNING DEGRADED PIPELINE ---
     doc_failure = "URGENT Internal Memo. The corporate strategy document needs review next week."
-    print("\nExecuting Scenario 2: Failure Injection (Step 4 Summarization Intercept)...")
-    intake_2 = pipeline.step_1_intake(IntakeInput(raw_text=doc_failure))
-    pipeline.step_2_extraction(intake_2)
-    class_2 = pipeline.step_3_classification(intake_2)
-    # Injecting failure mode toggle flag to Step 4
-    pipeline.step_4_summarization(intake_2, doc_type=class_2.document_type, simulate_failure=True)
+    print("\n================ EXECUTING PIPELINE (WITH FAILURE MODE) ================")
     
-    trace_2 = pipeline.flush_trace()
-    storage.save_trace(trace_2)
+    intake = pipeline.step_1_intake(IntakeInput(raw_text=doc_failure))
+    pipeline.step_2_extraction(intake)
+    class_out = pipeline.step_3_classification(intake)
+    
+    # Purposefully inject the failure flag into step 4
+    pipeline.step_4_summarization(intake, doc_type=class_out.document_type, simulate_failure=True)
+    
+    # Pull the trace and index it
+    trace = pipeline.flush_trace()
+    storage.save_trace(trace)
+
+    # --- FORENSIC ANALYSIS BLOCK ---
+    print("\n================ AUTOMATED ROOT-CAUSE FORENSICS ================")
+    diagnosis = analyzer.analyze_trace_failures(trace)
+    
+    print("\n[DIAGNOSTIC REPORT GENERATED]:")
+    print(f" • Identified Root Cause Step : {diagnosis['root_cause_step']}")
+    print(f" • Forensic Failure Category  : {diagnosis['failure_category']}")
+    print(f" • Judge Verdict Explanation : \"{diagnosis['explanation']}\"")
 
 if __name__ == "__main__":
     run_forensics_hubs()

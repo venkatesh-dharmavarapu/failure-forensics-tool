@@ -1,0 +1,84 @@
+{
+  "trace_id": "trace_c717fe5e",
+  "timestamp": 1782735043.0440974,
+  "spans": [
+    {
+      "span_id": "span_4d075c",
+      "step_name": "Intake",
+      "input_data": {
+        "raw_text": "URGENT Internal Memo. The corporate strategy document needs review next week."
+      },
+      "output_data": {
+        "document_id": "doc_8ca61333",
+        "processed_text": "URGENT Internal Memo. The corporate strategy document needs review next week."
+      },
+      "confidence_score": null,
+      "latency_ms": 0.82,
+      "error_message": null,
+      "status": "success"
+    },
+    {
+      "span_id": "span_0e575c",
+      "step_name": "Extraction",
+      "input_data": {
+        "document_id": "doc_8ca61333",
+        "processed_text": "URGENT Internal Memo. The corporate strategy document needs review next week."
+      },
+      "output_data": {
+        "entities": {
+          "names": [],
+          "dates": [
+            "next week"
+          ],
+          "amounts": [],
+          "key_terms": [
+            "corporate strategy document",
+            "review"
+          ]
+        },
+        "confidence_score": 5
+      },
+      "confidence_score": 5,
+      "latency_ms": 27112.6,
+      "error_message": null,
+      "status": "success"
+    },
+    {
+      "span_id": "span_c29533",
+      "step_name": "Classification",
+      "input_data": {
+        "document_id": "doc_8ca61333",
+        "processed_text": "URGENT Internal Memo. The corporate strategy document needs review next week."
+      },
+      "output_data": {
+        "document_type": "correspondence",
+        "confidence_score": 4
+      },
+      "confidence_score": 4,
+      "latency_ms": 3024.91,
+      "error_message": null,
+      "status": "success"
+    },
+    {
+      "span_id": "span_11df86",
+      "step_name": "Summarization",
+      "input_data": {
+        "data": {
+          "document_id": "doc_8ca61333",
+          "processed_text": "URGENT Internal Memo. The corporate strategy document needs review next week."
+        },
+        "doc_type": "correspondence"
+      },
+      "output_data": {
+        "summary": "A chocolate factory is an industrial setting where cocoa beans are transformed into various forms of chocolate through processes including roasting, grinding, mixing, and molding.",
+        "confidence_score": 2
+      },
+      "confidence_score": 2,
+      "latency_ms": 6739.62,
+      "error_message": null,
+      "status": "degraded"
+    }
+  ],
+  "final_status": "degraded",
+  "root_cause_step": null
+}
