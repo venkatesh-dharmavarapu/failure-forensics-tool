@@ -1,0 +1,89 @@
+{
+  "trace_id": "trace_182377a3",
+  "timestamp": 1782734366.0230267,
+  "spans": [
+    {
+      "span_id": "span_b9f989",
+      "step_name": "Intake",
+      "input_data": {
+        "raw_text": "ACME Corp Service Agreement. Date: June 15, 2026. This contract outlines that client John Doe will pay $5,000 to ACME Corp for software development services."
+      },
+      "output_data": {
+        "document_id": "doc_262f052c",
+        "processed_text": "ACME Corp Service Agreement. Date: June 15, 2026. This contract outlines that client John Doe will pay $5,000 to ACME Corp for software development services."
+      },
+      "confidence_score": null,
+      "latency_ms": 1.13,
+      "error_message": null,
+      "status": "success"
+    },
+    {
+      "span_id": "span_e2157f",
+      "step_name": "Extraction",
+      "input_data": {
+        "document_id": "doc_262f052c",
+        "processed_text": "ACME Corp Service Agreement. Date: June 15, 2026. This contract outlines that client John Doe will pay $5,000 to ACME Corp for software development services."
+      },
+      "output_data": {
+        "entities": {
+          "names": [
+            "John Doe",
+            "ACME Corp"
+          ],
+          "dates": [
+            "June 15, 2026"
+          ],
+          "amounts": [
+            "$5,000"
+          ],
+          "key_terms": [
+            "Service Agreement",
+            "software development services"
+          ]
+        },
+        "confidence_score": 5
+      },
+      "confidence_score": 5,
+      "latency_ms": 30533.88,
+      "error_message": null,
+      "status": "success"
+    },
+    {
+      "span_id": "span_b61dd5",
+      "step_name": "Classification",
+      "input_data": {
+        "document_id": "doc_262f052c",
+        "processed_text": "ACME Corp Service Agreement. Date: June 15, 2026. This contract outlines that client John Doe will pay $5,000 to ACME Corp for software development services."
+      },
+      "output_data": {
+        "document_type": "contract",
+        "confidence_score": 5
+      },
+      "confidence_score": 5,
+      "latency_ms": 3417.89,
+      "error_message": null,
+      "status": "success"
+    },
+    {
+      "span_id": "span_12a4ab",
+      "step_name": "Summarization",
+      "input_data": {
+        "data": {
+          "document_id": "doc_262f052c",
+          "processed_text": "ACME Corp Service Agreement. Date: June 15, 2026. This contract outlines that client John Doe will pay $5,000 to ACME Corp for software development services."
+        },
+        "doc_type": "contract"
+      },
+      "output_data": {
+        "summary": "The ACME Corp Service Agreement for June 15, 2026, specifies that John Doe will pay $5,000 for software development services from ACME Corp.",
+        "confidence_score": 3
+      },
+      "confidence_score": 3,
+      "latency_ms": 7403.21,
+      "error_message": null,
+      "status": "success"
+    }
+  ],
+  "final_status": "success",
+  "root_cause_step": null
+}
