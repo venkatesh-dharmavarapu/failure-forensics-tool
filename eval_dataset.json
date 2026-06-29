@@ -1,0 +1,9 @@
+[
+  {
+    "test_case_id": "eval_trace_d8efd2e2",
+    "raw_text": "URGENT Internal Memo. The corporate strategy document needs review next week.",
+    "failing_step": "Classification",
+    "failure_category": "Misclassification",
+    "expected_ground_truth": "Provide what the clean final summary should have realistically look like."
+  }
+]

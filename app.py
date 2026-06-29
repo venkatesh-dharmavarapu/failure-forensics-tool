@@ -63,62 +63,58 @@ if selected_trace_id:
         
         # Action Block: Run Forensics Engine
         st.subheader("⚡ Automated Forensic Investigation")
+        
+        # Initialize session state for holding diagnosis values across re-runs
+        if "current_diagnosis" not in st.session_state or st.session_state.get("last_trace_id") != selected_trace_id:
+            st.session_state.current_diagnosis = None
+            st.session_state.last_trace_id = selected_trace_id
+
         if st.button("Run Backward Trace Analysis (LLM-as-a-Judge)"):
             with st.spinner("Analyzing intermediate step spans backward..."):
-                # Reconstruct trace model instance
                 trace_obj = Trace(**trace_data)
-                diagnosis = analyzer.analyze_trace_failures(trace_obj)
+                st.session_state.current_diagnosis = analyzer.analyze_trace_failures(trace_obj)
                 
-                # Show results in a nice callout box
-                if diagnosis["root_cause_step"] != "None (Pipeline Healthy)":
-                    st.error(f"🚨 **Root Cause Isolated: {diagnosis['root_cause_step']}**")
-                    st.warning(f"**Failure Category:** {diagnosis['failure_category']}")
-                    st.info(f"**Judge Verdict Explanation:** \"{diagnosis['explanation']}\"")
-                else:
-                    st.success("🎉 All pipeline steps verified clean by LLM-as-a-judge.")
-                    
-                # Expandable Evidence Audit Logs
-                with st.expander("View Full Evidence Chain Details"):
-                    st.json(diagnosis["evidence_chain"])
-                    
-        st.write("---")
-        
-        # Visual Node Timeline Tree Explorer
-        st.subheader("📊 Pipeline Span Timeline Explorer")
-        
-        for span in trace_data.get("spans", []):
-            span_status = span.get("status", "success")
+        if st.session_state.current_diagnosis:
+            diagnosis = st.session_state.current_diagnosis
             
-            # Choose color boundaries based on individual span node health
-            if span_status == "success":
-                accent = "green"
-                icon = "✅"
-            elif span_status == "degraded":
-                accent = "orange"
-                icon = "⚠️"
-            else:
-                accent = "red"
-                icon = "❌"
+            if diagnosis["root_cause_step"] != "None (Pipeline Healthy)":
+                st.error(f"🚨 **Root Cause Isolated: {diagnosis['root_cause_step']}**")
+                st.warning(f"**Failure Category:** {diagnosis['failure_category']}")
+                st.info(f"**Judge Verdict Explanation:** \"{diagnosis['explanation']}\"")
                 
-            with st.container():
-                st.markdown(
-                    f"<div style='border-left: 5px solid {accent}; padding-left: 15px; margin-bottom: 15px;'>", 
-                    unsafe_allow_html=True
+                st.write("---")
+                st.markdown("### 📥 Feedback-to-Eval Loop Integration")
+                st.caption("Convert this confirmed pipeline breakdown into a structured regression test case item.")
+                
+                # Human-in-the-loop manual corrections block
+                corrected_text = st.text_area(
+                    "Provide Human Corrected/Golden Output Standard Summary:",
+                    value="Provide what the clean final summary should have realistically been."
                 )
                 
-                # Title Bar for individual Node container
-                conf = f"| Confidence: {span['confidence_score']}/5" if span.get("confidence_score") else ""
-                st.markdown(f"#### {icon} Step: {span['step_name']} <span style='font-size:14px; color:gray;'>({span['latency_ms']} ms {conf})</span>", unsafe_allow_html=True)
-                
-                # Multi-column Diff layouts
-                in_col, out_col = st.columns(2)
-                with in_col:
-                    st.caption("📥 Data Input Payload")
-                    st.json(span["input_data"])
-                with out_col:
-                    st.caption("📤 Data Output Produced")
-                    st.json(span["output_data"])
+                if st.button("Confirm Diagnosis & Commit to Eval Dataset"):
+                    import eval_loop
+                    trace_obj = Trace(**trace_data)
+                    trace_obj.root_cause_step = diagnosis["root_cause_step"]
                     
-                st.markdown("</div>", unsafe_allow_html=True)
-else:
-    st.info("💡 Run `python main.py` in your terminal to process documents and generate initial telemetry database rows.")
+                    eval_loop.log_failure_to_eval_suite(
+                        trace=trace_obj,
+                        human_corrected_output=corrected_text,
+                        confirmed_category=diagnosis["failure_category"]
+                    )
+                    st.success("🎉 Added to eval_dataset.json! This case will now be evaluated during regression tracking routines.")
+            else:
+                st.success("🎉 All pipeline steps verified clean by LLM-as-a-judge.")
+
+            # --- SIDEBAR SUB-SECTION: ACCUMULATED EVAL METRICS ---
+            st.sidebar.markdown("---")
+            st.sidebar.subheader("📈 Regression Test Center")
+            if st.sidebar.button("Run Pipeline Regression Test Suite"):
+                import eval_loop
+                suite_report = eval_loop.run_regression_suite()
+                
+                if "status" in suite_report and suite_report["status"] == "error":
+                    st.sidebar.error(suite_report["message"])
+                else:
+                    st.sidebar.metric("Suite Accuracy Rate", f"{suite_report['accuracy_rate']}%")
+                    st.sidebar.write(f"Resolved: `{suite_report['resolved_cases']}/{suite_report['total_cases']}` items.")
